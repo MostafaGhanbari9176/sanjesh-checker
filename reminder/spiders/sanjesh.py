@@ -1,4 +1,4 @@
-import scrapy, smtplib, ssl
+import scrapy, smtplib
 
 
 class SanjeshSpider(scrapy.Spider):
@@ -11,12 +11,12 @@ class SanjeshSpider(scrapy.Spider):
 
     def start_requests(self):
         print("start")
-        self.send_mail(self.create_mail_message('starting local service', 'Hello, this is a log email'))
+        self.send_mail(self.create_mail_message('starting crawler from host', 'Hello, this is a log email from host'))
         yield scrapy.Request(url="http://sanjesh.org/", callback=self.parse, dont_filter=True, errback=self.err_back)
 
     def parse(self, response):
         self.counter = self.counter + 1
-        if self.counter != 0 and self.counter % 12 == 0:
+        if self.counter % 12 == 0:
             self.send_mail(self.create_mail_message(f"Hourly reminder:{self.counter / 12}",
                                                     f"Hello, checking for {self.counter / 12} hours"))
         print(f"response number: {self.counter}")
@@ -44,9 +44,8 @@ class SanjeshSpider(scrapy.Spider):
 
     def send_mail(self, message):
         try:
-            ssl_context = ssl.create_default_context()
             print("create email instance")
-            smtp = smtplib.SMTP_SSL('mail.mostafaghanbari.ir', 465, context=ssl_context)
+            smtp = smtplib.SMTP('localhost')
             smtp.login(self._from, '*************************************************************')
             smtp.sendmail(self._from, self._to, message)
             smtp.close()
